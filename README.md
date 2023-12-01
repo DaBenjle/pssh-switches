@@ -6,7 +6,7 @@ When you can it is typically quicker to search the switches by unit name spreads
 The two default commands programmed in are for JunOS switches. But this could be easily circumvented by using the custom script functionality.
 
 # Warning
-This script was created to be used in a particular coporate environment. This environment has some instances where it cannot use proper key exchanging protocols. As such, this script was designed to ssh into servers using just a username and password. With little effort this could be changed to use keys.
+This script was created to be used in a particular corporate environment. This environment has some instances where it cannot use proper key exchanging protocols. As such, this script was designed to ssh into servers using just a username and password. With little effort this could be changed to use keys.
 
 # HowTo Install
 This script requires Python 3.6 or later along with a custom library parallel-ssh. (Note: parallel-ssh is only available on linux, so you will have to run this on WSL) You will install both below (Note: these installation commands are for Ubuntu installations, you will have to install them yourself for other installations):
