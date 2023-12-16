@@ -55,50 +55,13 @@ The above code will get the IP addresses from a file that you create, in this ca
 
 The script will only prompt you credentials until you provide one set. It will use this default set without prompting in the future. If you require 2 different logins, for example if you want to use your smartnoc credentials sometimes and your radius credentials other times, you can use the addCredential command (below). This will add a second (or more) set of credentials, and every time you use the program you will be prompted to choose which one you’d like to use.
 ## Basic Command Structure
-	
-	python3 psshToSwitches.py <command> <hostsfile> [additional arguments]
- All of the pre-supplied commands only take one argument. But there is support for more than one additional argument if someone wants to program their own permanent custom commands in that can take additional arguments.
+To see help page run:
+ 
+	python3 psshServers.py -h
+ For more detailed help pages run:
 
-### List of commands
-#### searchUnits: which requires 1 additional argument (the unit number)
-This example will search MyHosts for any unit labeled 332: 
-
-	python3 psshToSwitches.py searchUnits MyHosts.txt 332
-
- Specifically it is running this command: 
-
- 	show configuration interfaces | match {unitNumber}
-on every host in parallel. Then it compiles the output into your hell.
-#### searchMacs: which requires 1 additional argument (the mac address or just a piece of one)
-This example will search MyOtherHosts for any connected MAC addresses that contain f0:29:16: 
-
-	python3 psshToSwitches.py searchMacs MyOtherHosts.txt f0:29:16
-Specifically it is running this command:
-	
- 	show ethernet-switching table | match {macAddress}
-on every host in parallel. Then it compiles the output into your shell.
-#### custom: which requires 1 additional argument (the custom command to run)
-This example will run the provided command (whats in the 'quotes') on all of the MyHosts.
-
-	python3 psshToSwitches.py custom MyHosts.txt 'show class-of-service interface | match 684'
-This command in particular searches all of the class of services for any index that matches 684.
-As you can see, with the custom command, you can use this tool to do just about anything you can think of, in parallel on as many switches as you’d like.
-
-#### addCredential: which requires no additional arguments (**it also does not require a hostfile**)
-Example Usage:
-
-	python3 psshToSwitches.py addCredential
-It will then prompt you to input another username and password. In the future, when you use the program with multiple credentials, you will be prompted upon loading to determine which user you would like to use.
-## Interpreting Output
-This is the output from the example of how to use the custom command above. You can see the output from the custom command to the far right of each line. The part where it says Pyshical interface: ge-0/0/3x, Index: 684. The part to the left of that, is what the script prints. This allows you to see which switch the result was found on. For example, if we wanted to find the interface ge-0/0/39, Index: 684 we know that is on the switch with the ip: 1.1.1.1. This allows us to ssh directly into that switch if we wanted to perform any maintenance or troubleshooting on that port.
-### Somtimes you will run into an output that doesn't make much sense.
-This is a typical searchUnit output, it is rather easy to read: 
-
-This tells us that unit 332 is found on the switch 10.1.1.6.
-
-But lets say you wanted to look for unit 100 so you run: ... searchUnits MyHosts.txt 100. You might expect to get a similar output, when in reality you get: 
-
-This is because the search command is not perfect, remember it just runs show configuration interfaces | match {number}. In this case that is also picking up all the of RLIMIT100's because it contains 100. A better way to search for unit 100 would be to run: ... searchUnits MyHosts.txt Unit_100.
+ 	python3 psshServers.py runInstruction -h
+  	python3 psshServers.py addCredential -h
 
 ## Hostfiles
 In order to connect to switches you have to have their IP address. The same is true here. Except we need many IP addresses, one for each switch you need to connect to. We basically just make a list of switch IPs and I recommend calling it something like FancyPropertyNameHosts.txt. That way you can look through all of FancyPropertyName at once.
