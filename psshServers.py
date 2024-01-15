@@ -1,5 +1,6 @@
 from pssh.clients import ParallelSSHClient
 from pssh.utils import enable_host_logger
+from pssh.exceptions import Timeout
 import sys
 import os
 import json
@@ -42,20 +43,40 @@ def runInstruction(args):
     hosts = getHosts(args.hostFile)
     enable_host_logger()
     creds = getCredentials()
-    client = ParallelSSHClient(hosts, user=creds[0], password=creds[1]) if args.proxy is None else ParallelSSHClient(hosts, user=creds[0], password=creds[1], proxy_host=args.proxy[0], proxy_user=args.proxy[1], proxy_pkey=args.proxy[2])
+    universal_parameters = {'user': creds[0], 'password':creds[1], 'timeout': 120, 'num_retries': 0}
+    client = ParallelSSHClient(hosts, **universal_parameters) if args.proxy is None else ParallelSSHClient(hosts, **universal_parameters, proxy_host=args.proxy[0], proxy_user=args.proxy[1], proxy_pkey=args.proxy[2])
 
 
     #runs the formatted command(s) on all servers
     if type(command) is list:
         print("Please wait while the commands are run on all hosts...")
         for c in command:
-            client.run_command(c)
+            safe_run_command(client, c)
+            #client.run_command(c)
             #this will wait for all of the threads to finish, and consume_output prints the log
-            client.join(consume_output=True)
+            #client.join(consume_output=True)
     else:
-        client.run_command(command)
+        safe_run_command(client, command)
+        #client.run_command(command)
         #this will wait for all of the threads to finish, and consume_output prints the log
-        client.join(consume_output=True)
+        #client.join(consume_output=True)
+
+def safe_run_command(client, command: str):
+    output = client.run_command(command, read_timeout=10, stop_on_errors=False)
+    for host_out in output:
+        host = host_out.host
+        print(f"=====================\nHost: {host}, ExitCode: {host_out.exit_code}, Exception: {host_out.exception}\n=====================")
+        try:
+            for line in host_out.stdout:
+                print(line)
+            for line in host_out.stderr:
+                pass
+                #print(line)
+        except Timeout:
+            print(f"TIMEOUT WHILE READING: {host_out}")
+        except TypeError:
+            print("No data due to exception")
+        print("\n\n\n")
 
 #Host file path should be first argument (argv[0] is python file name)
 def getHosts(hostsFilePath):
